@@ -9,6 +9,7 @@ import json
 from cnp_align.utils import autoresolve, format_alignment_results, summarize_results
 from cnp_align.align import Alignment
 from cnp_align.format import Profile
+from cnp_align.CGHcall import convert_CGHcall
 
 
 def parse_args():
@@ -17,18 +18,22 @@ def parse_args():
                                      formatter_class=argparse.RawTextHelpFormatter,
                                      description='')
     parser.add_argument('-file', dest='file',
-                        help='Clonality or DNAcopy segment file (.csv)')
+                        help='Input file (.csv)')
+    parser.add_argument('-format', dest='format', default='clonality',
+                        help='Format of input file')
     parser.add_argument('-id', dest='exp_id', default='PATIENT',
                         help='Identifier of experiment/patient/sample')
     parser.add_argument('-out', dest='out', default='results',
                         help='Path of output folder')
     parser.add_argument('-autoresolve', dest='autoresolve', default=True,
                         help='Resolve missing bins')
+    parser.add_argument('-split', dest='split', default='split',
+                        help='Format of chroms (whole or split)')
     parser.add_argument('-sub_mat', dest='sub_mat',
                         default='data/general.blosum.json',
                         help='Path of subst. matrix (.json)')
     parser.add_argument('-null_scores', dest='null_scores',
-                        default='data/general.nullscores.json',
+                        default=None,
                         help='Path of null scores (.json)')
     parser.add_argument('-bin_size', dest='bin_size', default=100000,
                         help='Bin size (bp)')
@@ -52,10 +57,17 @@ def main(args=False):
 
     # Load data
     data = pd.read_csv(args.file)
+
+    # Convert CGHcall data segment format
+    if args.format == 'CGHcall':
+        data = convert_CGHcall(data, args.bin_size, args.autoresolve)
+
     with open(args.sub_mat) as f:
         matrix = json.load(f)
-    with open(args.null_scores) as f:
-        null_scores = json.load(f)
+    null_scores = args.null_scores
+    if args.null_scores is not None:
+        with open(args.null_scores) as f:
+            null_scores = json.load(f)
 
     # Prepare output folder
     if not os.path.exists(f'{args.out}'):
@@ -74,7 +86,7 @@ def main(args=False):
                 sample1 = data[data['ID'] == s1]
                 sample2 = data[data['ID'] == s2]
                 # Resolve missing bins
-                if args.autoresolve:
+                if args.autoresolve and args.format != 'CGHcall':
                     sample1 = autoresolve(sample1, args.bin_size)
                     sample2 = autoresolve(sample2, args.bin_size)
                     if args.verbose:
@@ -99,6 +111,7 @@ def main(args=False):
                 if args.verbose:
                     print("Visualizing pair " + s1 + '/' + s2 + '...')
                 A.plot(null_scores=null_scores, save=True,
+                       split=eval(args.split),
                        figname=f'{args.out}/{s1}_{s2}',
                        match_thresh=args.match_thresh,
                        mismatch_thresh=args.mismatch_thresh)

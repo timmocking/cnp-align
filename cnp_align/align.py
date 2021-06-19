@@ -96,7 +96,7 @@ class Alignment():
         return self.alignment
 
     def plot(self, chromosomes=None, null_scores=None, match_thresh=0.1,
-             mismatch_thresh=0.5, save=False, figname=None):
+             mismatch_thresh=0.5, save=False, figname=None, split=True):
         """Return and/or save visualisation of profiles with
         alignment features."""
         if self.alignment is None:
@@ -105,19 +105,22 @@ class Alignment():
         if chromosomes is None:
             # Plot all chromosomes
             # Arrange chromosome order and remove missing arms
-            chromosome_order = get_chrom_order()
-            missing = find_missing_chrom(self.alignment, verbose=False)
+            chromosome_order = get_chrom_order(split)
+            missing = find_missing_chrom(self.alignment, split, verbose=False)
             for i in missing:
                 chromosome_order.remove(i)
         else:
             chromosome_order = chromosomes
 
-        pos = chromosome_order.index('chr11p')
+        if split:
+            pos = chromosome_order.index('chr11p')
+        else:
+            pos = chromosome_order.index('chr12')
 
         # Plot first half
         plot_alignment(self.alignment, chromosome_order[:pos], null_scores,
-                       match_thresh, mismatch_thresh, save, 'chr1-chr10')
+                       match_thresh, mismatch_thresh, save, figname+'_chr1-chr10')
 
         # Plot second half
         plot_alignment(self.alignment, chromosome_order[pos:], null_scores,
-                       match_thresh, mismatch_thresh, save, 'chr10-chr22')
+                       match_thresh, mismatch_thresh, save, figname+'_chr10-chr22')

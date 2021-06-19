@@ -6,7 +6,7 @@ import pandas as pd
 from statistics import mean, median
 
 
-def get_chrom_order():
+def get_chrom_order(split=True):
     """Returns ordered list of chromosomes in format:
             ['chr1p', 'chr1q', ... 'chr22q']
        Excluding sex chromosomes!
@@ -14,11 +14,17 @@ def get_chrom_order():
     order = []
     for i in range(1, 23):
         if len(str(i)) == 1:
-            order.append('chr0'+str(i)+'p')
-            order.append('chr0'+str(i)+'q')
+            if split:
+                order.append('chr0'+str(i)+'p')
+                order.append('chr0'+str(i)+'q')
+            else:
+                order.append('chr0'+str(i))
         else:
-            order.append('chr'+str(i)+'p')
-            order.append('chr'+str(i)+'q')
+            if split:
+                order.append('chr'+str(i)+'p')
+                order.append('chr'+str(i)+'q')
+            else:
+                order.append('chr'+str(i))
     return order
 
 
@@ -40,9 +46,9 @@ def get_chrom_proportions(chrom):
     return prop
 
 
-def find_missing_chrom(dictionary, verbose=True):
+def find_missing_chrom(dictionary, split=True, verbose=True):
     """Looks for missing chroms in a dictionary and prints the missing values."""
-    order = get_chrom_order()
+    order = get_chrom_order(split)
     missing = [i for i in order if i not in dictionary.keys()]
     if verbose:
         print('Detected', len(missing), 'missing arms')
