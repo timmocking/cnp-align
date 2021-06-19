@@ -17,10 +17,14 @@ def plot_aberration(ax, chrom):
     chrom = chrom.replace('-', '')
     y = []
     for i in range(len(chrom)):
-        if chrom[i] == 'G':
+        if chrom[i] == 'A':
+            y.append(2)
+        elif chrom[i] == 'G':
             y.append(1)
         elif chrom[i] == 'L':
             y.append(-1)
+        elif chrom[i] == 'Z':
+            y.append(-2)
         else:
             y.append(0)
     # Collapse continuous lines (plotting speed optimalization)
@@ -170,7 +174,7 @@ def plot_alignment(alignment, order, null_scores, match_thresh=0.1,
             plt.xticks([])
             ax.tick_params(axis='y', length=0)
             plt.grid(False)
-            ax.set_ylim(-1.5, 1.5)
+            ax.set_ylim(-2.5, 2.5)
 
             # Set length of x-axis equal to sequence
             # Removes possible gaps from the alignment in order to align seqs
