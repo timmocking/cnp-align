@@ -8,6 +8,7 @@ import json
 
 from .format import Profile
 from .utils import get_chrom_order
+from .CGHcall import convert_CGHcall
 
 
 def get_sequence_dataframe(data, bin_size):
@@ -42,7 +43,7 @@ def get_sequence_dataframe(data, bin_size):
     return pd.DataFrame(all_seqs)
 
 
-def blosum(dictionary, bin_size):
+def blosum(dictionary, bin_size, states):
     """Creates a BLOSUM-like subsittution matrix based on
     copy number alterations instead of nucleotides.
     Based upon: https://tinyurl.com/x5tcksxf
@@ -60,9 +61,11 @@ def blosum(dictionary, bin_size):
     # For every position, find and count all possible
     # combinations of two samples (add one to prevent zero-division errors in
     # case of unobserved combinations)
-    pair_counts = {'NN': 1, 'NG': 1, 'NL': 1,
-                   'GN': 1, 'GG': 1, 'GL': 1,
-                   'LN': 1, 'LG': 1, 'LL': 1}
+    pair_counts = {}
+    for i in states:
+        for j in states:
+            pair_counts[i+j] = 1
+
     for pos in pattern_dict:
         for sample1 in pattern_dict[pos]:
             for sample2 in pattern_dict[pos]:
@@ -77,7 +80,10 @@ def blosum(dictionary, bin_size):
     pair_probabilities = {k: v/n for k, v in pair_counts.items()}
 
     # Calculate probability of occurrence for every alteration
-    cnv_probabilities = {'G': 0, 'N': 0, 'L': 0}
+    cnv_probabilities = {}
+    for i in states:
+        cnv_probabilities[i] = 0
+
     for i in cnv_probabilities:
         numer = 0
         for j in pair_counts:
@@ -108,15 +114,15 @@ def blosum(dictionary, bin_size):
 
     # Format final matrix as nested dict
     nested_dict = {}
-    values = ['N', 'G', 'L']
-    for i in values:
+    for i in states:
         nested_dict[i] = {}
-        for j in values:
+        for j in states:
             nested_dict[i][j] = blosum_matrix[i+j]
     return nested_dict
 
 
-def create_blosum_matrices(paths, bin_size, per_arm=False, outfile=None):
+def create_blosum_matrices(paths, bin_size, per_arm=False, outfile=None,
+                           CGHcall=False, split=False):
     """
     Args:
         paths (dictionary): Dictionary with sample names.
@@ -132,10 +138,12 @@ def create_blosum_matrices(paths, bin_size, per_arm=False, outfile=None):
     # Load all files
     segments = {}
     for sample in paths:
-        segments[sample] = pd.read_csv(paths[sample], index_col=0)
-    order = get_chrom_order()
+        segments[sample] = pd.read_csv(paths[sample])
+        if convert_CGHcall:
+            segments[sample] = convert_CGHcall(segments[sample], bin_size)
+    order = get_chrom_order(split)
     matrices = {}
-    matrix = blosum(segments, bin_size)
+    matrix = blosum(segments, bin_size, states=['A', 'G', 'N', 'L', 'D'])
     # Insert same matrix for every arm
     for i in order:
         matrices[i] = matrix
