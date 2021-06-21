@@ -122,7 +122,7 @@ def blosum(dictionary, bin_size, states):
 
 
 def create_blosum_matrices(paths, bin_size, per_arm=False, outfile=None,
-                           CGHcall=False, split=False):
+                           convert_CGHcall=False, states=['G', 'N', 'L'], split=False):
     """
     Args:
         paths (dictionary): Dictionary with sample names.
@@ -143,7 +143,7 @@ def create_blosum_matrices(paths, bin_size, per_arm=False, outfile=None,
             segments[sample] = convert_CGHcall(segments[sample], bin_size)
     order = get_chrom_order(split)
     matrices = {}
-    matrix = blosum(segments, bin_size, states=['A', 'G', 'N', 'L', 'D'])
+    matrix = blosum(segments, bin_size, states=states)
     # Insert same matrix for every arm
     for i in order:
         matrices[i] = matrix
