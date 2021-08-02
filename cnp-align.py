@@ -27,7 +27,7 @@ def parse_args():
                         help='Path of output folder')
     parser.add_argument('-autoresolve', dest='autoresolve', default=True,
                         help='Resolve missing bins')
-    parser.add_argument('-split', dest='split', default='split',
+    parser.add_argument('-split', dest='split', default='True',
                         help='Format of chroms (whole or split)')
     parser.add_argument('-sub_mat', dest='sub_mat',
                         default='data/general.blosum.json',
@@ -113,8 +113,8 @@ def main(args=False):
                 A.plot(null_scores=null_scores, save=True,
                        split=eval(args.split),
                        figname=f'{args.out}/{s1}_{s2}',
-                       match_thresh=args.match_thresh,
-                       mismatch_thresh=args.mismatch_thresh)
+                       match_thresh=float(args.match_thresh),
+                       mismatch_thresh=float(args.mismatch_thresh))
                 dfs[f'{s1}_{s2}'] = df
                 observed.append({s1, s2})
 
