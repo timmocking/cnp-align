@@ -121,7 +121,7 @@ def plot_proba_box(ax, chrom, significant, box_type, plot_row_name):
              fontsize=Config().font_size)
 
 
-def plot_alignment(alignment, order, null_scores, match_thresh=0.1,
+def plot_alignment(alignment, order, null_scores, match_thresh=0.25,
                    mismatch_thresh=0.1, save=False, figname=None):
     """Visualizes similarity of two copy number profiles along with a number
     of alignment-based features.
@@ -147,8 +147,8 @@ def plot_alignment(alignment, order, null_scores, match_thresh=0.1,
     if null_scores is not None:
         # Create additional boxes for visualizing null_scores and
         # match/mismatch probabilities
-        n_rows = 7
-        height_ratios = [1, 1, 0.25, 0.25, 0.25, 0.25, 0.25]
+        n_rows = 6
+        height_ratios = [1, 1, 0.25, 0.25, 0.25, 0.25]
     gs = fig.add_gridspec(n_rows, len(alignment), width_ratios=width_ratios,
                           height_ratios=height_ratios)
 
@@ -174,7 +174,7 @@ def plot_alignment(alignment, order, null_scores, match_thresh=0.1,
             plt.xticks([])
             ax.tick_params(axis='y', length=0)
             plt.grid(False)
-            ax.set_ylim(-2.5, 2.5)
+            ax.set_ylim(-1.5, 1.5)
 
             # Set length of x-axis equal to sequence
             # Removes possible gaps from the alignment in order to align seqs
@@ -201,10 +201,10 @@ def plot_alignment(alignment, order, null_scores, match_thresh=0.1,
             plot_proba_box(ax, alignment[i[1]],
                            alignment[i[1]]['match_proba'] <= match_thresh,
                            'match', plot_row_name=i[0] == 0)
-            ax = fig.add_subplot(gs[6, i[0]])
-            plot_proba_box(ax, alignment[i[1]],
-                           alignment[i[1]]['mismatch_proba'] <= mismatch_thresh,
-                           'mismatch', plot_row_name=i[0] == 0)
+            # ax = fig.add_subplot(gs[6, i[0]])
+            # plot_proba_box(ax, alignment[i[1]],
+            #                alignment[i[1]]['mismatch_proba'] <= mismatch_thresh,
+            #                'mismatch', plot_row_name=i[0] == 0)
 
     # Remove superfluous spacing between subplots
     plt.subplots_adjust(wspace=0, hspace=0)
