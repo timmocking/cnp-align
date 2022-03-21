@@ -92,14 +92,14 @@ def main(args=False):
                     if args.verbose:
                         print("Resolved all missing areas")
                 # Convert to Profile class objects
-                profile1 = Profile(s1, args.bin_size, sample1)
-                profile2 = Profile(s2, args.bin_size, sample2)
+                profile1 = Profile(s1, args.bin_size, sample1, format=args.format)
+                profile2 = Profile(s2, args.bin_size, sample2, format=args.format)
                 # Perform alignments
                 if args.verbose:
                     print("Aligning pair " + s1 + '/' + s2 + '...')
                 A = Alignment(profile1, profile2)
                 results = A.align(matrix, args.gap_open, args.gap_extend,
-                                  null_scores=null_scores)
+                                  null_scores=null_scores, format=args.format)
                 # Dump alignment to json
                 outfile = f'{args.out}/{s1}_{s2}_alignment.json'
                 with open(outfile, 'w') as json_file:
