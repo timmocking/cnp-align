@@ -111,11 +111,11 @@ def main(args=False):
                 # Visualisation
                 if args.verbose:
                     print("Visualizing pair " + s1 + '/' + s2 + '...')
-                A.plot(null_scores=null_scores, save=True,
-                       split=eval(args.split),
-                       figname=f'{args.out}/{s1}_{s2}',
-                       match_thresh=float(args.match_thresh),
-                       mismatch_thresh=float(args.mismatch_thresh))
+                # A.plot(null_scores=null_scores, save=True,
+                #        split=eval(args.split),
+                #        figname=f'{args.out}/{s1}_{s2}',
+                #        match_thresh=float(args.match_thresh),
+                #        mismatch_thresh=float(args.mismatch_thresh))
                 dfs[f'{s1}_{s2}'] = df
                 observed.append({s1, s2})
 
