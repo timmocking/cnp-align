@@ -9,7 +9,7 @@ import json
 from cnp_align.utils import autoresolve, format_alignment_results, summarize_results
 from cnp_align.align import Alignment
 from cnp_align.format import Profile
-from cnp_align.CGHcall import convert_CGHcall
+from cnp_align.CGHcall import convert_CGHcall_probs
 
 
 def parse_args():
