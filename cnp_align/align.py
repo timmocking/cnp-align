@@ -22,7 +22,7 @@ class Alignment():
         self.profile2 = profile2
         self.alignment = None
 
-    def align(self, sub_matrix, gap_open=10000, gap_extend=10000,
+    def align(self, sub_matrix, format, gap_open=10000, gap_extend=10000,
               null_scores=None):
         """Performs copy-number alignment using Biopython's pairwise2 global
         sequence alignment and returns various alignment metrics.
@@ -62,6 +62,7 @@ class Alignment():
         profile2_dict = self.profile2.get_dict()
         # Check if both profiles have same amount of chromosome arms
         assert len(profile1_dict) == len(profile2_dict)
+        
         # Perform alignment per chromosome arm
         # Return alignments as nested dictionary with keys (arms) and alignment
         # output (values)
@@ -69,28 +70,47 @@ class Alignment():
         for arm in profile1_dict:
             # Convert substitution matrix to Biopython format
             formatted_matrix = format_subst_matrix(sub_matrix[arm])
-            # Perform alignment
-            result = pairwise2.align.globalds(profile1_dict[arm],
-                                              profile2_dict[arm],
-                                              formatted_matrix,
-                                              gap_open,
-                                              gap_extend)
-            # Format output of alignment
-            alignments[arm] = {'seq1': result[0].seqA,
-                               'seq2': result[0].seqB,
-                               'score': result[0].score,
-                               'adjusted_score': result[0].score /
-                               len(result[0].seqA),
-                               'seq1_gaps': result[0].seqA.count('-'),
-                               'seq2_gaps': result[0].seqB.count('-')}
-            # Add match/mismatch probability based on panel of null-scores
-            if null_scores is not None:
-                bigger = len([i for i in null_scores[arm]
-                              if i >= alignments[arm]['adjusted_score']])
-                smaller = len([i for i in null_scores[arm]
-                              if i < alignments[arm]['adjusted_score']])
-                alignments[arm]['match_proba'] = bigger / len(null_scores[arm])
-                alignments[arm]['mismatch_proba'] = smaller / len(null_scores[arm])
+            
+            if format == 'clonality':
+                # Perform alignment
+                result = pairwise2.align.globalds(profile1_dict[arm],
+                                                  profile2_dict[arm],
+                                                  formatted_matrix,
+                                                  gap_open,
+                                                  gap_extend)
+                # Format output of alignment
+                alignments[arm] = {'seq1': result[0].seqA,
+                                   'seq2': result[0].seqB,
+                                   'score': result[0].score,
+                                   'adjusted_score': result[0].score /
+                                   len(result[0].seqA),
+                                   'seq1_gaps': result[0].seqA.count('-'),
+                                   'seq2_gaps': result[0].seqB.count('-')}
+                # Add match/mismatch probability based on panel of null-scores
+                if null_scores is not None:
+                    bigger = len([i for i in null_scores[arm]
+                                  if i >= alignments[arm]['adjusted_score']])
+                    smaller = len([i for i in null_scores[arm]
+                                  if i < alignments[arm]['adjusted_score']])
+                    alignments[arm]['match_proba'] = bigger / len(null_scores[arm])
+                    alignments[arm]['mismatch_proba'] = smaller / len(null_scores[arm])
+
+            
+            elif format == 'CGHcall':
+                # Perform profile-profile alignment
+                
+                # Loop over all positions
+                score = 0
+                
+                for i in range(len(profile1_dict[arm])):
+                    for state1 in profile1_dict[arm][i]:
+                        for state2 in profile2_dict[arm][i]:
+                            score += profile1_dict[arm][i][state1] * \
+                                profile2_dict[arm][i][state2] * \
+                                formatted_matrix[(state1[4], state2[4])]
+                                
+                alignments[arm] = {'score':score,
+                                   'adjusted_score':score/len(profile1_dict[arm])}
         # Store and return alingments
         self.alignment = alignments
         return self.alignment
