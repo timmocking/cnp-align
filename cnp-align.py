@@ -60,7 +60,7 @@ def main(args=False):
 
     # Convert CGHcall data segment format
     if args.format == 'CGHcall':
-        data = convert_CGHcall(data, args.bin_size, args.autoresolve)
+        data = convert_CGHcall_probs(data, args.bin_size, args.autoresolve)
 
     with open(args.sub_mat) as f:
         matrix = json.load(f)
