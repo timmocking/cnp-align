@@ -98,8 +98,9 @@ def main(args=False):
                 if args.verbose:
                     print("Aligning pair " + s1 + '/' + s2 + '...')
                 A = Alignment(profile1, profile2)
-                results = A.align(matrix, args.gap_open, args.gap_extend,
-                                  null_scores=null_scores, format=args.format)
+                results = A.align(matrix, format=args.format, 
+                                gap_open=args.gap_open, gap_extend=args.gap_extend,
+                                null_scores=null_scores, )
                 # Dump alignment to json
                 outfile = f'{args.out}/{s1}_{s2}_alignment.json'
                 with open(outfile, 'w') as json_file:
